@@ -16,14 +16,21 @@ conflicts=(skindesigner-{blackhole,holo,metrixhd,nopacity,shady,shady_kiss,skine
 replaces=(skindesigner-{blackhole,holo,metrixhd,nopacity,shady,shady_kiss,skinelchi,tryouts})
 _plugname=${pkgname//vdr-/}
 source=("http://projects.vdr-developer.org/git/vdr-plugin-skindesigner.git/snapshot/vdr-plugin-$_plugname-$pkgver.tar.bz2"
+        "0001-skindesigner_vdr-3.2.1-porting.patch.gz::http://www.vdr-portal.de/index.php?page=Attachment&attachmentID=38738"
         '99-skindesigner.conf'
         "50-$_plugname.conf")
 install="$pkgname.install"
 backup=("etc/vdr/conf.avail/50-$_plugname.conf")
 options=('!emptydirs')
 md5sums=('526871bed22a6e05e3c959b0a9ec7931'
+         '300de44467bc5ef349ae5dfdb8de3d9e'
          'bab4227c649d778e4b05483535afda0b'
          'ebc6537bf0d3e604c59884ec408f7e9c')
+
+prepare() {
+  cd "${srcdir}/vdr-plugin-$_plugname-$pkgver" || exit
+  patch -p1 -i "$srcdir/0001-skindesigner_vdr-3.2.1-porting.patch"
+}
 
 build() {
   cd "${srcdir}/vdr-plugin-$_plugname-$pkgver"
