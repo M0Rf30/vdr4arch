@@ -12,10 +12,17 @@ license=('GPL2')
 depends=('gcc-libs' "vdr-api=${_vdrapi}")
 _plugname=${pkgname//vdr-/}
 source=("http://www.saunalahti.fi/~rahrenbe/vdr/soppalusikka/files/$pkgname-$pkgver.tgz"
+        "skinoppalusikka-vdr2.3.1compat.diff::https://github.com/rofafor/vdr-plugin-skinsoppalusikka/commit/54896b4ecf5381b5823c6f03b62f58902cf3581b.diff"
         "50-$_plugname.conf")
 backup=("etc/vdr/conf.avail/50-$_plugname.conf")
 md5sums=('a5fa88ec9a3b56bdeefbec6449e37ce5'
+         '5c3854c9f49bc0aee510311a9687ebe3'
          'bd9d1d8599cb554fe4a59ceeb08662d8')
+
+prepare() {
+  cd "${srcdir}/${_plugname}-${pkgver}"
+  patch -p1 -i "$srcdir/skinoppalusikka-vdr2.3.1compat.diff"
+}
 
 build() {
   cd "${srcdir}/${_plugname}-${pkgver}"
