@@ -2,26 +2,40 @@
 
 # Maintainer: Christopher Reimer <mail+vdr4arch[at]c-reimer[dot]de>
 pkgname=vdr-tvguideng
-pkgver=0.1.5
+pkgver=0.1.6_2_gc341a63
+_gitrev=c341a635d9b0c4dfdd5e2f6ab25f9d94f53ac795
 _vdrapi=2.3.1
-pkgrel=3
+pkgrel=1
 pkgdesc="highly customizable 2D EPG viewer plugin."
 url="http://projects.vdr-developer.org/projects/plg-tvguideng"
 arch=('x86_64' 'i686' 'arm' 'armv6h' 'armv7h')
 license=('GPL2')
 depends=("vdr-api=$_vdrapi" 'vdr-skindesigner')
+makedepends=('git')
 _plugname=${pkgname//vdr-/}
-source=("http://projects.vdr-developer.org/git/vdr-plugin-$_plugname.git/snapshot/vdr-plugin-$_plugname-$pkgver.tar.bz2")
+source=("git+https://projects.vdr-developer.org/git/vdr-plugin-tvguideng.git#commit=$_gitrev"
+        "tvguideng-vdr-2.3.1-porting.patch.gz::http://www.vdr-portal.de/index.php?page=Attachment&attachmentID=38912")
 backup=("etc/vdr/conf.avail/50-$_plugname.conf")
-md5sums=('415cea445c57fee9e621bc555378e1ef')
+md5sums=('SKIP'
+         'ff2df920e1c59e9c7bc4400f84d90117')
+
+pkgver() {
+  cd "${srcdir}/vdr-plugin-${_plugname}"
+  git describe --tags | sed 's/-/_/g'
+}
+
+prepare() {
+  cd "${srcdir}/vdr-plugin-${_plugname}"
+  patch -p1 -i "$srcdir/tvguideng-vdr-2.3.1-porting.patch"
+}
 
 build() {
-  cd "$srcdir/vdr-plugin-$_plugname-$pkgver"
+  cd "${srcdir}/vdr-plugin-${_plugname}"
   make
 }
 
 package() {
-  cd "$srcdir/vdr-plugin-$_plugname-$pkgver"
+  cd "${srcdir}/vdr-plugin-${_plugname}"
   make DESTDIR="$pkgdir" install
 
   mkdir -p "$pkgdir/etc/vdr/conf.avail"
