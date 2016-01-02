@@ -13,17 +13,21 @@ depends=('iproute2' 'lm_sensors' 'hddtemp' "vdr-api=${_vdrapi}")
 #install="$pkgname.install"
 _plugname=${pkgname//vdr-/}
 source=("http://firefly.vdr-developer.org/systeminfo/${pkgname}-${pkgver}.tar.bz2"
+        "systeminfo-0.1.3_vdr-2.3.1.patch.gz::http://www.vdr-portal.de/index.php?page=Attachment&attachmentID=38737"
         'systeminfo.sh'
         "50-$_plugname.conf")
 backup=("etc/vdr/conf.avail/50-$_plugname.conf"
         "usr/lib/vdr/bin/$_plugname.sh")
 md5sums=('1fe264cf2059628103f134c9aba53529'
+         'f26423b5388419aaeb7b2d9a1076ff56'
          'ea31a11d19b78f30f389793ebc34c3cb'
          '62018cc3ec0c08c596255821d9e7163e')
 
 prepare() {
   cd "${srcdir}/${_plugname}-${pkgver}"
   sed -i 's/usr\/local/usr\/lib\/vdr/g' systeminfo.c
+  
+  patch -p0 -i "$srcdir/systeminfo-0.1.3_vdr-2.3.1.patch"
 }
 
 build() {
