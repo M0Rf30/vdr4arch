@@ -16,10 +16,12 @@ makedepends=('git')
 _plugname=${pkgname//vdr-/}
 source=("git://projects.vdr-developer.org/vdr-plugin-markad.git#commit=$_gitver"
         "markad-newmakefile-vdr-1.7.36.tgz::http://www.vdr-portal.de/index.php?page=Attachment&attachmentID=32670"
+        "markad_vdr-2.3.1.patch.gz::http://www.vdr-portal.de/index.php?page=Attachment&attachmentID=38739"
         "50-$_plugname.conf")
 backup=("etc/vdr/conf.avail/50-$_plugname.conf")
 md5sums=('SKIP'
          '5dd5c090a59066adca01ac487a9faeae'
+         '3a89c4930803002021406e8d976517c1'
          'c0d6383c9c9b8ee6c34af19179676bf3')
 
 pkgver() {
@@ -29,6 +31,7 @@ pkgver() {
 
 prepare() {
   cd "${srcdir}/vdr-plugin-${_plugname}"
+  patch -p1 -i "$srcdir/markad_vdr-2.3.1.patch"
   cp "$srcdir/markad/plugin/Makefile" plugin/Makefile
 }
 
