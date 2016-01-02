@@ -2,26 +2,34 @@
 
 # Maintainer: Christopher Reimer <mail+vdr4arch[at]c-reimer[dot]de>
 pkgname=vdr-zaphistory
-pkgver=0.9.6
+pkgver=0.9.6_1_g484b48a
+_gitrev=484b48a61c841a72c12c3a347bbafd0b96826da3
 _vdrapi=2.3.1
-pkgrel=15
+pkgrel=1
 pkgdesc="History of the latest viewed channels"
 url="http://projects.vdr-developer.org/projects/plg-zaphistory"
 arch=('x86_64' 'i686' 'arm' 'armv6h' 'armv7h')
 license=('GPL2')
 depends=('gcc-libs' "vdr-api=${_vdrapi}")
+makedepends=('git')
 _plugname=${pkgname//vdr-/}
-source=("http://projects.vdr-developer.org/attachments/download/1437/$_plugname-$pkgver.tar.gz")
+source=("git+https://projects.vdr-developer.org/git/vdr-plugin-zaphistory.git#commit=$_gitrev")
 backup=("etc/vdr/conf.avail/50-$_plugname.conf")
-md5sums=('70298659539f63c043694b565396e513')
+md5sums=('SKIP')
+
+pkgver() {
+  cd "${srcdir}/vdr-plugin-$_plugname"
+  git tag -a 0.9.6 -m 'Added Tag' 111b0cc69414d8025a66b3325a65d7286be87df7 2> /dev/null
+  git describe --tags | sed 's/-/_/g'
+}
 
 build() {
-  cd "$srcdir/$_plugname-$pkgver"
+  cd "${srcdir}/vdr-plugin-$_plugname"
   make
 }
 
 package() {
-  cd "$srcdir/$_plugname-$pkgver"
+  cd "${srcdir}/vdr-plugin-$_plugname"
   make DESTDIR="$pkgdir" install
 
   mkdir -p "$pkgdir/etc/vdr/conf.avail"
