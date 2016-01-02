@@ -2,26 +2,34 @@
 
 # Maintainer: Christopher Reimer <mail+vdr4arch[at]c-reimer[dot]de>
 pkgname=vdr-neutrinoepg
-pkgver=0.3.6
+pkgver=0.3.6_3_gad017d8
+_gitrev=ad017d88d94f888246f4a66d178273b9626ad107
 _vdrapi=2.3.1
-pkgrel=15
+pkgrel=1
 pkgdesc="Neat EPG-Viewer for VDR"
 url="http://projects.vdr-developer.org/projects/plg-neutrinoepg"
 arch=('x86_64' 'i686' 'arm' 'armv6h' 'armv7h')
 license=('GPL2')
 depends=('gcc-libs' "vdr-api=$_vdrapi")
+makedepends=('git')
 _plugname=${pkgname//vdr-/}
-source=("http://projects.vdr-developer.org/attachments/download/1475/$_plugname-$pkgver.tar.gz")
+source=("git+https://projects.vdr-developer.org/git/vdr-plugin-neutrinoepg.git#commit=$_gitrev")
 backup=("etc/vdr/conf.avail/50-$_plugname.conf")
-md5sums=('881426478efc94111c3f11c6b68f25c4')
+md5sums=('SKIP')
+
+pkgver() {
+  cd "${srcdir}/vdr-plugin-$_plugname"
+  git tag -a 0.3.6 -m 'Added Tag' 812eaeb5033c3cd349d043d4360c1867b161c263 2> /dev/null
+  git describe --tags | sed 's/-/_/g'
+}
 
 build() {
-  cd "$srcdir/$_plugname-$pkgver"
+  cd "${srcdir}/vdr-plugin-$_plugname"
   make
 }
 
 package() {
-  cd "$srcdir/$_plugname-$pkgver"
+  cd "${srcdir}/vdr-plugin-$_plugname"
   make DESTDIR="$pkgdir" install
 
   mkdir -p "$pkgdir/etc/vdr/conf.avail"
