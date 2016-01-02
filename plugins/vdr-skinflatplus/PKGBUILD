@@ -2,10 +2,10 @@
 
 # Maintainer: Christopher Reimer <mail+vdr4arch[at]c-reimer[dot]de>
 pkgname=vdr-skinflatplus
-pkgver=0.5.1
-_gitver=e03133d00c19982f609dc124cee71f1f6b59e32b
+pkgver=0.5.1_22_g47176f6
+_gitver=47176f630b9fe30eca7c2420dfb9c1b7d8f67590
 _vdrapi=2.3.1
-pkgrel=6
+pkgrel=1
 pkgdesc="Simple and slim skin for VDR"
 url="http://projects.vdr-developer.org/projects/plg-skinflatplus"
 arch=('x86_64' 'i686' 'arm' 'armv6h' 'armv7h')
