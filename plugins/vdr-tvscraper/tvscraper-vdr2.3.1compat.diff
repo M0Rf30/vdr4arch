@@ -1,0 +1,119 @@
+diff -ruN tvscraper-0.2.0.orig/config.c tvscraper-0.2.0/config.c
+--- tvscraper-0.2.0.orig/config.c	2016-01-03 19:11:10.858899183 +0100
++++ tvscraper-0.2.0/config.c	2016-01-03 19:12:29.570127073 +0100
+@@ -18,7 +18,12 @@
+ }
+ 
+ bool cTVScraperConfig::ChannelActive(int channelNum) {
++#if APIVERSNUM >= 20301
++    LOCK_CHANNELS_READ;
++    const cChannel *channel = Channels->GetByNumber(channelNum);
++#else
+     cChannel *channel = Channels.GetByNumber(channelNum);
++#endif
+     if (channel) {
+         string channelID = "";
+         channelID = *(channel->GetChannelID().ToString());
+diff -ruN tvscraper-0.2.0.orig/setup.c tvscraper-0.2.0/setup.c
+--- tvscraper-0.2.0.orig/setup.c	2016-01-03 19:11:10.858899183 +0100
++++ tvscraper-0.2.0/setup.c	2016-01-03 19:18:47.916449725 +0100
+@@ -6,7 +6,12 @@
+ 
+ cTVScraperSetup::cTVScraperSetup(cTVScraperWorker *workerThread) {
+     worker = workerThread;
++#if APIVERSNUM >= 20301
++    LOCK_CHANNELS_READ;
++    int numChannels = Channels->Count();
++#else
+     int numChannels = Channels.Count();
++#endif
+     for (int i=0; i<numChannels; i++) {
+         int akt = 0;
+         if (config.ChannelActive(i+1))
+@@ -60,7 +65,12 @@
+     int numChannels = channelsScrap.size();
+     for (int i=0; i<numChannels; i++) {
+         if (channelsScrap[i] == 1) {
++#if APIVERSNUM >= 20301
++            LOCK_CHANNELS_READ;
++            const cChannel *channel = Channels->GetByNumber(i+1);
++#else
+             cChannel *channel = Channels.GetByNumber(i+1);
++#endif
+             if (channel) {
+                 string channelID = *(channel->GetChannelID().ToString());
+                 channelsToScrap << channelID << ";";
+@@ -89,7 +99,12 @@
+     int currentItem = Current();
+     Clear();
+     int i=0;
++#if APIVERSNUM >= 20301
++    LOCK_CHANNELS_READ;
++    for (const cChannel *channel = Channels->First(); channel; channel = Channels->Next(channel)) {
++#else
+     for (cChannel *channel = Channels.First(); channel; channel = Channels.Next(channel)) {
++#endif
+         if (!channel->GroupSep()) {
+             Add(new cMenuEditBoolItem(channel->Name(), &channelsScrap->at(i), tr("don't scrap"), tr("scrap")));
+             i++;
+@@ -108,4 +123,4 @@
+             break;
+     }
+     return state;
+-}
+\ No newline at end of file
++}
+diff -ruN tvscraper-0.2.0.orig/worker.c tvscraper-0.2.0/worker.c
+--- tvscraper-0.2.0.orig/worker.c	2016-01-03 19:11:10.858899183 +0100
++++ tvscraper-0.2.0/worker.c	2016-01-03 19:16:23.520432926 +0100
+@@ -130,13 +130,22 @@
+     int numChannels = channels.size();
+     for (int i=0; i<numChannels; i++) {
+         string channelID = channels[i];
++#if APIVERSNUM >= 20301
++        LOCK_CHANNELS_READ;
++        const cChannel *channel = Channels->GetByChannelID(tChannelID::FromString(channelID.c_str()));
++#else
+         const cChannel *channel = Channels.GetByChannelID(tChannelID::FromString(channelID.c_str()));
++#endif
+         if (!channel)
+             continue;
+         dsyslog("tvscraper: scraping Channel %s %s", channel->Name(), channelID.c_str());
++#if APIVERSNUM >= 20301
++        LOCK_SCHEDULES_READ;
++#else
+         cSchedulesLock schedulesLock;
+-        const cSchedules *schedules = cSchedules::Schedules(schedulesLock);
+-        const cSchedule *Schedule = schedules->GetSchedule(channel);
++        const cSchedules *Schedules = cSchedules::Schedules(schedulesLock);
++#endif
++        const cSchedule *Schedule = Schedules->GetSchedule(channel);
+         if (Schedule) {
+             const cEvent *event = NULL;
+             for (event = Schedule->Events()->First(); event; event =  Schedule->Events()->Next(event)) {
+@@ -160,7 +169,12 @@
+ 
+ void cTVScraperWorker::ScrapRecordings(void) {
+     db->ClearRecordings();
++#if APIVERSNUM >= 20301
++    LOCK_RECORDINGS_READ;
++    for (const cRecording *rec = Recordings->First(); rec; rec = Recordings->Next(rec)) {
++#else
+     for (cRecording *rec = Recordings.First(); rec; rec = Recordings.Next(rec)) {
++#endif
+         if (overrides->IgnorePath(rec->FileName()))
+             continue;
+         const cRecordingInfo *recInfo = rec->Info();
+@@ -188,7 +202,12 @@
+ }
+ 
+ void cTVScraperWorker::CheckRunningTimers(void) {
++#if APIVERSNUM >= 20301
++    LOCK_TIMERS_READ;
++    for (const cTimer *timer = Timers->First(); timer; timer = Timers->Next(timer)) {
++#else
+     for (cTimer *timer = Timers.First(); timer; timer = Timers.Next(timer)) {
++#endif
+         if (timer->Recording()) {
+             const cEvent *event = timer->Event();
+             if (!event)
