@@ -1,0 +1,48 @@
+diff --git a/watch.c b/watch.c
+index 6414c29..93c8cd1 100644
+--- a/watch.c
++++ b/watch.c
+@@ -138,7 +138,12 @@ void cVFDWatch::shutdown(int nExitMode) {
+   }
+ 
+   if(this->isopen()) {
++#if APIVERSNUM >= 20301
++    LOCK_TIMERS_READ;
++    const cTimer* t = Timers->GetNextActiveTimer();
++#else
+     cTimer* t = Timers.GetNextActiveTimer();
++#endif
+ 
+     switch(nExitMode) {
+       case eOnExitMode_NEXTTIMER:
+@@ -822,7 +827,12 @@ void cVFDWatch::Channel(int ChannelNumber)
+         chName = NULL;
+     }
+ 
++#if APIVERSNUM >= 20301
++    LOCK_CHANNELS_READ;
++    const cChannel * ch = Channels->GetByNumber(ChannelNumber);
++#else
+     cChannel * ch = Channels.GetByNumber(ChannelNumber);
++#endif
+     if(ch) {
+       chID = ch->GetChannelID();
+       chPresentTime = 0;
+@@ -841,10 +851,14 @@ bool cVFDWatch::Program() {
+     bool bChanged = false;
+     const cEvent * p = NULL;
+     cSchedulesLock schedulesLock;
+-    const cSchedules * schedules = cSchedules::Schedules(schedulesLock);
+-    if (chID.Valid() && schedules)
++#if APIVERSNUM >= 20301
++    LOCK_SCHEDULES_READ;
++#else
++    const cSchedules * Schedules = cSchedules::Schedules(schedulesLock);
++#endif
++    if (chID.Valid() && Schedules)
+     {
+-        const cSchedule * schedule = schedules->GetSchedule(chID);
++        const cSchedule * schedule = Schedules->GetSchedule(chID);
+         if (schedule)
+         {
+             if ((p = schedule->GetPresentEvent()) != NULL)
