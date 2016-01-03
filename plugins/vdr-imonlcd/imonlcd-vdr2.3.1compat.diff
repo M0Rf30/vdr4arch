@@ -1,0 +1,48 @@
+diff -ruN imonlcd-1.0.1.orig/watch.c imonlcd-1.0.1/watch.c
+--- imonlcd-1.0.1.orig/watch.c	2016-01-03 14:01:00.596296229 +0100
++++ imonlcd-1.0.1/watch.c	2016-01-03 14:03:38.186322929 +0100
+@@ -140,7 +140,12 @@
+   }
+ 
+   if(this->isopen()) {
+-    cTimer* t = Timers.GetNextActiveTimer();    
++#if APIVERSNUM >= 20301
++    LOCK_TIMERS_READ;
++    const cTimer* t = Timers->GetNextActiveTimer();
++#else
++    cTimer* t = Timers.GetNextActiveTimer();
++#endif
+ 
+     switch(nExitMode) {
+       case eOnExitMode_NEXTTIMER: {
+@@ -849,7 +854,12 @@
+     m_eVideoMode = eVideoNone;
+     m_eAudioMode = eAudioNone;
+ 
++#if APIVERSNUM >= 20301
++    LOCK_CHANNELS_READ;
++    const cChannel * ch = Channels->GetByNumber(ChannelNumber);
++#else
+     cChannel * ch = Channels.GetByNumber(ChannelNumber);
++#endif
+     if(ch) {
+       chID = ch->GetChannelID();
+       chPresentTime = 0;
+@@ -872,10 +882,14 @@
+     bool bChanged = false;
+     const cEvent * p = NULL;
+     cSchedulesLock schedulesLock;
+-    const cSchedules * schedules = cSchedules::Schedules(schedulesLock);
+-    if (chID.Valid() && schedules)
++#if APIVERSNUM >= 20301
++    LOCK_SCHEDULES_READ;
++#else
++    const cSchedules * Schedules = cSchedules::Schedules(schedulesLock);
++#endif
++    if (chID.Valid() && Schedules)
+     {
+-        const cSchedule * schedule = schedules->GetSchedule(chID);
++        const cSchedule * schedule = Schedules->GetSchedule(chID);
+         if (schedule)
+         {
+             if ((p = schedule->GetPresentEvent()) != NULL)
