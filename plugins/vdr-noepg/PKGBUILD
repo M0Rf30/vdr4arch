@@ -2,8 +2,8 @@
 
 # Maintainer: Christopher Reimer <mail+vdr4arch[at]c-reimer[dot]de>
 pkgname=vdr-noepg
-pkgver=0.0.4
-_gitver=b18cfff51a8d7722cc7f8ae511596714995f6c92
+pkgver=0.0.5
+_gitver=779c9aef12be1dd2e03bce535c1c69f4a97b7f0f
 _vdrapi=2.3.1
 pkgrel=3
 pkgdesc="Replace the noepg-patch with the new cEpgHandler of vdr >= 1.7.26"
