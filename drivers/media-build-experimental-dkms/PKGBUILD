@@ -6,8 +6,8 @@ _pkgbase="media_build_experimental"
 pkgname="media-build-experimental-dkms"
 pkgdesc="Oliver Endriss experimental media tree as DKMS"
 pkgver=r501.82186b8b60da
-pkgrel=1
-arch=("i686" "x86_64")
+pkgrel=2
+arch=('any')
 url="http://linuxtv.org/hg/~endriss/media_build_experimental"
 license=("GPL")
 depends=("dkms")
@@ -16,8 +16,12 @@ replaces=('digitaldevices-dvb-drivers' 'dvbsky-dvb-drivers' 'technotrend-dvb-dri
 conflicts=('digitaldevices-dvb-drivers' 'dvbsky-dvb-drivers' 'technotrend-dvb-drivers')
 provides=('dddvb-dkms')
 install="${pkgname}.install"
-source=("hg+http://linuxtv.org/hg/~endriss/$_pkgbase")
-md5sums=('SKIP')
+source=("hg+http://linuxtv.org/hg/~endriss/$_pkgbase"
+        "pci_dma_supported.diff::http://www.vdr-portal.de/index.php?page=Attachment&attachmentID=39130"
+        "adp1653.diff::http://www.vdr-portal.de/index.php?page=Attachment&attachmentID=39129")
+md5sums=('SKIP'
+         '5300ba568ad1b39230fc9ccadaf43612'
+         'aed1c45b6a3e8c828a767060295adbcd')
 
 
 pkgver() {
@@ -35,12 +39,18 @@ prepare() {
   echo 'CLEAN="make clean"' >> dkms.conf
 
   cd "$srcdir/$_pkgbase"
+
   make download
   make untar
+  
+  cd linux
+  patch -p1 -i "$srcdir/pci_dma_supported.diff"
+  patch -p1 -i "$srcdir/adp1653.diff"
+  cd ..
 
   sed "/scripts\/rmmod.pl/d" -i experimental/v4l-dvb-saa716x/v4l/Makefile
   sed "/scripts\/rmmod.pl/d" -i v4l/Makefile
-}
+ }
 
 build() {
   cd "$srcdir/$_pkgbase"
